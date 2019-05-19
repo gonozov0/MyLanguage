@@ -1,0 +1,11 @@
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\bin\Debug\netcoreapp2.1\Compiler.deps.json
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\bin\Debug\netcoreapp2.1\Compiler.runtimeconfig.json
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\bin\Debug\netcoreapp2.1\Compiler.runtimeconfig.dev.json
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\bin\Debug\netcoreapp2.1\Compiler.dll
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\bin\Debug\netcoreapp2.1\Compiler.pdb
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\obj\Debug\netcoreapp2.1\Compiler.csprojAssemblyReference.cache
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\obj\Debug\netcoreapp2.1\Compiler.csproj.CoreCompileInputs.cache
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\obj\Debug\netcoreapp2.1\Compiler.AssemblyInfoInputs.cache
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\obj\Debug\netcoreapp2.1\Compiler.AssemblyInfo.cs
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\obj\Debug\netcoreapp2.1\Compiler.dll
+E:\MyProjects\VisualStudioProjects\Compiler\Compiler\obj\Debug\netcoreapp2.1\Compiler.pdb

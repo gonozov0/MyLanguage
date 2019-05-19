@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Compiler": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\..\\..\\MyLanguageCodeExample.txt ..\\..\\..\\MyLanguageCodeExample2.txt"
+    }
+  }
+}
