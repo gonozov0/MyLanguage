@@ -1,30 +1,59 @@
 ﻿using Compiler.Parser;
 using Compiler.Stack_machine.Linked_list;
+using Compiler.Stack_machine.Functions;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Text;
 
 namespace Compiler.Stack_machine
 {
     class StackMachine
     {
-        private VariableTable<int> _intVariableTable;
+        public VariableTable<int> intVariableTable;
         private VariableTable<bool> _boolVariableTable;
         private VariableTable<MyLinkedList<int>> _linkedListVariableTable;
         private VariableTable<HashSet<int>> _hashSetVariableTable;
+        private VariableTable<Function> _globalFuncTable;
+        private Stack<Parse> _auxiliaryStack;
+        private Stack<Parse> _parseStack;
 
         public StackMachine()
         {
-            _intVariableTable = new VariableTable<int>();
+            intVariableTable = new VariableTable<int>();
             _boolVariableTable = new VariableTable<bool>();
             _linkedListVariableTable = new VariableTable<MyLinkedList<int>>();
             _hashSetVariableTable = new VariableTable<HashSet<int>>();
         }
-
-        public void Execute(Queue<Parse> parseSequense)
+        public StackMachine(VariableTable<Function> globalFuncTable)
         {
-            Stack<Parse> _auxiliaryStack = new Stack<Parse>();
-            Stack<Parse> _parseStack = new Stack<Parse>();
+            intVariableTable = new VariableTable<int>();
+            _boolVariableTable = new VariableTable<bool>();
+            _linkedListVariableTable = new VariableTable<MyLinkedList<int>>();
+            _hashSetVariableTable = new VariableTable<HashSet<int>>();
+            _globalFuncTable = globalFuncTable;
+        }
+
+        public Parse ExecuteWithResult(Queue<Parse> parseSequense)
+        {
+            this.Execute(parseSequense);
+            if (_parseStack.Count == 1)
+            {
+                return _parseStack.Pop();
+            }
+            else if (_parseStack.Count == 0)
+            {
+                return new Parse("", ParseType.NULL);
+            }
+            else
+                throw new Exception("Stack have more then 1 items in end of execution");
+        }
+
+        public async void Execute(Queue<Parse> parseSequense)
+        {
+            _auxiliaryStack = new Stack<Parse>();
+            _parseStack = new Stack<Parse>();
+            bool isAsync = false;
             while (parseSequense.Count > 0)
             {
                 var parse = parseSequense.Dequeue();
@@ -63,7 +92,7 @@ namespace Compiler.Stack_machine
                             case ParseType.VAR:
                                 try
                                 {
-                                    operand1 = _intVariableTable[parse1.Value];
+                                    operand1 = intVariableTable[parse1.Value];
                                     isInt = true;
                                 }
                                 catch (Exception ex)
@@ -129,19 +158,19 @@ namespace Compiler.Stack_machine
                                 switch (parse.Value)
                                 {
                                     case "=":
-                                        _intVariableTable[key] = operand1;
+                                        intVariableTable[key] = operand1;
                                         break;
                                     case "+=":
-                                        _intVariableTable[key] += operand1;
+                                        intVariableTable[key] += operand1;
                                         break;
                                     case "-=":
-                                        _intVariableTable[key] -= operand1;
+                                        intVariableTable[key] -= operand1;
                                         break;
                                     case "*=":
-                                        _intVariableTable[key] *= operand1;
+                                        intVariableTable[key] *= operand1;
                                         break;
                                     case "/=":
-                                        _intVariableTable[key] /= operand1;
+                                        intVariableTable[key] /= operand1;
                                         break;
                                     default:
                                         throw new Exception("Not valid operation received for int type");
@@ -173,10 +202,10 @@ namespace Compiler.Stack_machine
                         parse1 = _parseStack.Pop();
                         parse2 = _parseStack.Pop();
                         operand1 = parse1.ParseType == ParseType.DIGIT || parse1.ParseType == ParseType.LIST ? Int32.Parse(parse1.Value) :
-                            (parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                            (parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable"));
                         operand2 = parse2.ParseType == ParseType.DIGIT || parse2.ParseType == ParseType.LIST ? Int32.Parse(parse2.Value) :
-                            (parse2.ParseType == ParseType.VAR ? _intVariableTable[parse2.Value] :
+                            (parse2.ParseType == ParseType.VAR ? intVariableTable[parse2.Value] :
                             throw new Exception("Got not a number and not variable"));
                         switch (parse.Value)
                         {
@@ -225,10 +254,10 @@ namespace Compiler.Stack_machine
                         parse1 = _parseStack.Pop();
                         parse2 = _parseStack.Pop();
                         operand1 = parse1.ParseType == ParseType.DIGIT || parse1.ParseType == ParseType.LIST ? Int32.Parse(parse1.Value) :
-                            (parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                            (parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable"));
                         operand2 = parse2.ParseType == ParseType.DIGIT || parse2.ParseType == ParseType.LIST ? Int32.Parse(parse2.Value) :
-                            (parse2.ParseType == ParseType.VAR ? _intVariableTable[parse2.Value] :
+                            (parse2.ParseType == ParseType.VAR ? intVariableTable[parse2.Value] :
                             throw new Exception("Got not a number and not variable"));
                         switch (parse.Value)
                         {
@@ -249,16 +278,16 @@ namespace Compiler.Stack_machine
                         break;
                     case ParseType.DEC:
                         parse1 = _parseStack.Pop();
-                        operand1 = parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                        operand1 = parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable");
-                        _intVariableTable[parse1.Value] = --operand1;
+                        intVariableTable[parse1.Value] = --operand1;
                         _parseStack.Push(new Parse(parse1.Value, parse1.ParseType));
                         break;
                     case ParseType.INC:
                         parse1 = _parseStack.Pop();
-                        operand1 = parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                        operand1 = parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable");
-                        _intVariableTable[parse1.Value] = ++operand1;
+                        intVariableTable[parse1.Value] = ++operand1;
                         _parseStack.Push(new Parse(parse1.Value, parse1.ParseType));
                         break;
                     case ParseType.COND_TRAN:
@@ -309,7 +338,7 @@ namespace Compiler.Stack_machine
                         parse1 = _parseStack.Pop();
                         parse2 = _parseStack.Pop();
                         operand1 = parse1.ParseType == ParseType.DIGIT ? Int32.Parse(parse1.Value) :
-                            (parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                            (parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable"));
                         if (parse2.ParseType == ParseType.VAR) {
                             /*try
@@ -334,7 +363,7 @@ namespace Compiler.Stack_machine
                         parse1 = _parseStack.Pop();
                         parse2 = _parseStack.Pop();
                         operand1 = parse1.ParseType == ParseType.DIGIT ? Int32.Parse(parse1.Value) :
-                            (parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                            (parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable"));
                         if (parse2.ParseType == ParseType.VAR)
                         {
@@ -359,7 +388,7 @@ namespace Compiler.Stack_machine
                         parse1 = _parseStack.Pop();
                         parse2 = _parseStack.Pop();
                         operand1 = parse1.ParseType == ParseType.DIGIT ? Int32.Parse(parse1.Value) :
-                            (parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                            (parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable"));
                         if (parse2.ParseType == ParseType.VAR)
                         {
@@ -381,7 +410,7 @@ namespace Compiler.Stack_machine
                         parse1 = _parseStack.Pop();
                         parse2 = _parseStack.Pop();
                         operand1 = parse1.ParseType == ParseType.DIGIT ? Int32.Parse(parse1.Value) :
-                            (parse1.ParseType == ParseType.VAR ? _intVariableTable[parse1.Value] :
+                            (parse1.ParseType == ParseType.VAR ? intVariableTable[parse1.Value] :
                             throw new Exception("Got not a number and not variable"));
                         if (parse2.ParseType == ParseType.VAR)
                         {
@@ -392,8 +421,50 @@ namespace Compiler.Stack_machine
                         else
                             throw new Exception("Was recieved not a Linked List object");
                         break;
+                    case ParseType.ASYNC:
+                        isAsync = true;
+                        //Task outer = new Task(() => Th.());
+                        break;
+                    case ParseType.FUNC_NAME:
+                        Function function = _globalFuncTable[parse.Value];
+                        if (parseSequense.TryDequeue(out parse) && parse.ParseType == ParseType.FUNC_ARG_BEGIN)
+                        {
+                            var _stackMachine = new StackMachine();
+                            var parseArgSequense = new Queue<Parse>();
+                            ushort i = 0;
+                            while (parseSequense.TryDequeue(out parse) && parse.ParseType != ParseType.FUNC_ARG_CLOSE)
+                            {
+                                parseArgSequense.Enqueue(parse);
+                                if (parseSequense.TryPeek(out parse) && parse.ParseType == ParseType.FUNC_ARG_DELIMITER)
+                                {
+                                    parseSequense.Dequeue();
+                                    _stackMachine.intVariableTable[function.Args[i++]] = Int32.Parse(_stackMachine.ExecuteWithResult(parseArgSequense).Value);
+                                    parseArgSequense.Clear();
+                                }
+                            }
+                            _stackMachine.intVariableTable[function.Args[i++]] = Int32.Parse(_stackMachine.ExecuteWithResult(parseArgSequense).Value);
+                            parseArgSequense.Clear();
+                            if (isAsync)
+                            {
+                                var task = Task.Run(() =>
+                                {
+                                    _stackMachine.intVariableTable.Extend(intVariableTable.GetDict());
+                                    _stackMachine.Execute(function.Value);
+                                    intVariableTable.Extend(_stackMachine.intVariableTable.GetDict());
+                                });
+                                isAsync = false;
+                            }
+                            else
+                            {
+                                _stackMachine.intVariableTable.Extend(intVariableTable.GetDict());
+                                _stackMachine.Execute(function.Value);
+                                intVariableTable.Extend(_stackMachine.intVariableTable.GetDict());
+                            }
+                        }
+                        break;
                     case ParseType.PRINT:
-                        _intVariableTable.Print();
+                        Task.WaitAll();
+                        intVariableTable.Print();
                         _boolVariableTable.Print();
                         _linkedListVariableTable.Print();
                         _hashSetVariableTable.Print();

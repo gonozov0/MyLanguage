@@ -1,0 +1,12 @@
+﻿func MyFunc1(a, b, c) {
+	c *= a*b;
+}
+
+func MyFunc2(a, b) {
+	d = a+b;
+}
+
+MyFunc1(2, 3, 10);
+async MyFunc2(2, 3);
+
+print

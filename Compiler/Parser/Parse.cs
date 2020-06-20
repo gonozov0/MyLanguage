@@ -64,6 +64,8 @@ namespace Compiler.Parser
                     return ParseType.CREATE_LIST;
                 case TokenType.CREATE_HASH_SET:
                     return ParseType.CREATE_HASH_SET;
+                case TokenType.ASYNC:
+                    return ParseType.ASYNC;
                 default:
                     throw new Exception("match for " + tokenType + " not found");
             }

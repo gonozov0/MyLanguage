@@ -23,8 +23,11 @@
     LB_S,
     RB_S,
     DOT,
+    COM,
     ADD,
     DELETE,
     CONTAINS,
-    END_SIGN
+    END_SIGN,
+    FUNC,
+    ASYNC
 }

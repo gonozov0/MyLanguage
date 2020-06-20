@@ -36,9 +36,13 @@ namespace Compiler.Tokenizer
             _tokenDefinitions.Add(new TokenDefinition(TokenType.RB_S, @"\]", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.LB_S, @"\[", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.DOT, @"\.", 1));
+            _tokenDefinitions.Add(new TokenDefinition(TokenType.COM, @"\,", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.ADD, @"Add", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.DELETE, @"Delete", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.CONTAINS, @"Contains", 1));
+            _tokenDefinitions.Add(new TokenDefinition(TokenType.FUNC, @"Func", 1));
+            _tokenDefinitions.Add(new TokenDefinition(TokenType.ASYNC, @"Async", 1));
+
         }
 
         public IEnumerable<Token> Tokenize(string text)

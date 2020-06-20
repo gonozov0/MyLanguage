@@ -32,6 +32,22 @@ namespace Compiler.Stack_machine
             }
         }
 
+        public Dictionary<string, T> GetDict()
+        {
+            return _dict;
+        }
+
+        public void Extend(Dictionary<string, T> dict)
+        {
+            foreach (var item in dict)
+            {
+                if (!_dict.ContainsKey(item.Key))
+                {
+                    _dict.Add(item.Key, item.Value);
+                }
+            }
+        }
+
         public void Print()
         {
             Console.WriteLine("Variable table:");

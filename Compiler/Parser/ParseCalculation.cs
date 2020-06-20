@@ -11,6 +11,7 @@ namespace Compiler.Parser
         private Queue<Parse> _parseSequence;
         private uint _labelNum;
         Dictionary<string, string> _transitionsAndLabelsBound;
+        
 
         public ParseCalculation()
         {
@@ -32,6 +33,7 @@ namespace Compiler.Parser
                 case TokenType.VAR:
                 case TokenType.CREATE_LIST:
                 case TokenType.CREATE_HASH_SET:
+                case TokenType.ASYNC:
                     _parseSequence.Enqueue(new Parse(token));
                     break;
                 case TokenType.LB_S:
@@ -96,6 +98,19 @@ namespace Compiler.Parser
             _transitionsAndLabelsBound.Add(labelName, transitionName);*/
             _parseSequence.Enqueue(new Parse(_labelNum.ToString(), ParseType.LABEL));
             return _labelNum++;
+        }
+        public void AddFunc(string name)
+        {
+            _parseSequence.Enqueue(new Parse(name, ParseType.FUNC_NAME));
+            _parseSequence.Enqueue(new Parse("(", ParseType.FUNC_ARG_BEGIN));
+        }
+        public void AddFuncArg()
+        {
+            _parseSequence.Enqueue(new Parse(";", ParseType.FUNC_ARG_DELIMITER));
+        }
+        public void CloseFuncArg()
+        {
+            _parseSequence.Enqueue(new Parse(")", ParseType.FUNC_ARG_CLOSE));
         }
 
         public Queue<Parse> GetParseSequence()

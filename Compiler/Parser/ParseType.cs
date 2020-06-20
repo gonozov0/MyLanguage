@@ -29,6 +29,13 @@ namespace Compiler.Parser
         ADD,
         DELETE,
         CONTAINS,
-        INDEX
+        INDEX,
+        TRIAD_LINK,
+        NULL,
+        FUNC_NAME,
+        FUNC_ARG_BEGIN,
+        FUNC_ARG_CLOSE,
+        FUNC_ARG_DELIMITER,
+        ASYNC
     }
 }

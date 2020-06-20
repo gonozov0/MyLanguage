@@ -2,6 +2,8 @@
 using Compiler.Tokenizer;
 using System.Collections.Generic;
 using System.Text;
+using Compiler.Stack_machine;
+using Compiler.Stack_machine.Functions;
 
 namespace Compiler.Parser
 {
@@ -9,11 +11,23 @@ namespace Compiler.Parser
     {
         private Stack<Token> _tokenSequence;
         private ParseCalculation _parseCalculation;
+        private VariableTable<Function> _globalFuncTable;
+
         //List<string> ExeptionList;
+
+        public PrecedenceBasedRPNParser()
+        {
+            
+        }
+        public PrecedenceBasedRPNParser(ref VariableTable<Function> globalFuncTable)
+        {
+            _globalFuncTable = globalFuncTable;
+        }
+
         public Queue<Parse> Parse(List<Token> tokens)
         {
-            LoadSequenceStack(tokens);
             _parseCalculation = new ParseCalculation();
+            LoadSequenceStack(tokens);
 
             Lang();
 
@@ -84,6 +98,20 @@ namespace Compiler.Parser
                     /*case TokenType.LB_S:
                         _parseCalculation.Add(token);
                         break;*/
+                    case TokenType.LB:
+                        while (_tokenSequence.TryPop(out token) && token.TokenType != TokenType.RB)
+                        {
+                            if (token.TokenType != TokenType.COM)
+                                Stmt(token);
+                            else
+                            {
+                                _parseCalculation.AddFuncArg();
+                            }
+                        }
+                        _parseCalculation.CloseFuncArg();
+                        //if (_tokenSequence.TryPeek(out token) && token.TokenType == TokenType.SEM)
+                        //    _tokenSequence.Pop();
+                        break;
                     case TokenType.DOT:
                         token = _tokenSequence.Pop();
                         if (token.TokenType == TokenType.ADD || token.TokenType == TokenType.DELETE)
@@ -165,6 +193,11 @@ namespace Compiler.Parser
         {
             if (token.TokenType != TokenType.VAR)
                 return false;
+            if (_tokenSequence.Peek().TokenType == TokenType.LB)
+            {
+                _parseCalculation.AddFunc(token.Value);
+                return true;
+            }
             _parseCalculation.Add(token);
             if (_tokenSequence.TryPeek(out token) && token.TokenType == TokenType.LB_S)
             {
@@ -185,7 +218,14 @@ namespace Compiler.Parser
             if (!isSuccess)
                 isSuccess = WhileExpr(token);
             if (!isSuccess)
-                if (token.TokenType == TokenType.PRINT)
+                isSuccess = FuncDefExpr(token);
+            if (!isSuccess)
+                if (token.TokenType == TokenType.ASYNC)
+                {
+                    _parseCalculation.Add(token);
+                    isSuccess = true;
+                }
+                else if (token.TokenType == TokenType.PRINT)
                 {
                     _parseCalculation.Add(token);
                     isSuccess = true;
@@ -309,5 +349,46 @@ namespace Compiler.Parser
                 return true;
             }
         }
+        private bool FuncDefExpr(Token token)
+        {
+            if (token.TokenType == TokenType.FUNC)
+            {
+                token = _tokenSequence.Pop();
+                if (token.TokenType == TokenType.VAR && _tokenSequence.Pop().TokenType == TokenType.LB)
+                {
+                    var function = new Function();
+                    function.Name = token.Value;
+                    // Добавление аргументов
+                    while (_tokenSequence.TryPop(out token) && token.TokenType != TokenType.RB)
+                    {
+                        switch (token.TokenType)
+                        {
+                            case TokenType.VAR:
+                                function.Args.Add(token.Value);
+                                break;
+                            case TokenType.COM:
+                                break;
+                            default:
+                                throw new Exception("Non var arguments in function defenition");
+                        }
+                    }
+                    // Парсинг тела функции
+                    if (_tokenSequence.TryPop(out token) && token.TokenType == TokenType.LB_F)
+                    {
+                        var tokenList = new List<Token>();
+                        while (_tokenSequence.TryPop(out token) && token.TokenType != TokenType.RB_F)
+                        {
+                            tokenList.Add(token);
+                        }
+                        var parser = new PrecedenceBasedRPNParser();
+                        function.Value = parser.Parse(tokenList);
+                        _globalFuncTable[function.Name] = function;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
     }
 }
