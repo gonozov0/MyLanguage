@@ -1,0 +1,3 @@
+This is educational project in which I learned how to write compilers using machine stack and Polish notation.
+There is also a triad optimization.
+You can find examples of the input file syntax for the language inside the compiler.
